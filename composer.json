@@ -1,0 +1,10 @@
+{
+	"name": "NiceException/NiceException",
+	"require": {
+		"php": ">=5.3.3",
+		"another-vendor/package": "1.*"
+	},
+	"autoload": {
+		"psr-0": {"NiceException": "src/"}
+	}
+}
