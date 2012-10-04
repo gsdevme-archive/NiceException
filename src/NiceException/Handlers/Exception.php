@@ -20,35 +20,24 @@
 			$niceException->setLine($exception->getLine());
 			$niceException->setFile(new SplFileObject($exception->getFile(), 'r'));
 
-			//echo '<pre>' . print_r($niceException, true) . '</pre>';
+			$exceptionCollection[] = $niceException;
 
-			echo '<pre>' . print_r((string)$niceException, true) . '</pre>';
+			if ($exception->getPrevious() !== null) {
+				$previous = $exception->getPrevious();
 
-			// Rebuild exception into a nice structure
-			/*array_push($this->_outputArray, ( object ) array(
-					'class' => substr(get_class($this->_exception), strrpos(get_class($this->_exception), '\\')),
-					'message' => $this->_exception->getMessage(),
-					'line' => $this->_exception->getLine(),
-					'file' => $this->_exception->getFile(),
-					'trace' => $this->_exception->getTrace(),
-					'htmlFile' => $this->_getPHPLines($this->_exception->getFile(), $this->_exception->getLine()),
-			));*/
+				$niceException = new NiceException();
+				$niceException->setClass(substr(get_class($previous), strrpos(get_class($previous), '\\')));
+				$niceException->setMessage($previous->getMessage());
+				$niceException->setLine($previous->getLine());
+				$niceException->setFile(new SplFileObject($previous->getFile(), 'r'));
 
-
-
-			/*if ($this->_exception->getPrevious() !== null) {
-				array_push($this->_outputArray, ( object ) array(
-						'class' => substr(get_class($this->_exception), strrpos(get_class($this->_exception), '\\')),
-						'message' => $this->_exception->getPrevious()->getMessage(),
-						'line' => $this->_exception->getPrevious()->getLine(),
-						'file' => $this->_exception->getPrevious()->getFile(),
-						'trace' => $this->_exception->getPrevious()->getTrace(),
-						'htmlFile' => $this->_getPHPLines($this->_exception->getPrevious()->getFile(), $this->_exception->getPrevious()->getLine()),
-				));
+				$exceptionCollection[] = $niceException;
 			}
 
+			var_dump($exceptionCollection);
+
 			// Build trace
-			if ($this->_exception->getTrace() !== null) {
+			/*if ($this->_exception->getTrace() !== null) {
 				foreach ($this->_exception->getTrace() as $trace) {
 					if (isset($trace['line'], $trace['file'], $trace['args'], $trace['class'], $trace['function'])) {
 						array_push($this->_outputArray, ( object ) array(
