@@ -2,10 +2,10 @@
 
 	namespace NiceException;
 
-	class ProductionExceptionHandler implements Interfaces\ExceptionHandler
+	class ProductionExceptionHandler extends Handlers\Exception
 	{
 
-		public function run($exception)
+		public function run(\Exception $exception)
 		{
 			/*if(headers_sent() !== true){
 				header('Cache-Control: no-cache, must-revalidate');
@@ -14,6 +14,6 @@
 				exit;
 			}*/
 
-			var_dump($exception);
+			echo '<pre>' . print_r($exception, true) . '</pre>';
 		}
 	}

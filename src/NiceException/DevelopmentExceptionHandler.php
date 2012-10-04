@@ -2,11 +2,11 @@
 
 	namespace NiceException;
 
-	class DevelopmentExceptionHandler implements Interfaces\ExceptionHandler
+	class DevelopmentExceptionHandler extends Handlers\Exception
 	{
 
-		public function run($exception)
+		public function run(\Exception $exception)
 		{
-			var_dump($exception);
+			parent::run($exception);
 		}
 	}

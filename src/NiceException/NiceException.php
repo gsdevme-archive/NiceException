@@ -53,10 +53,10 @@
 				->_setErrorHandler();
 
 			if($this->isDevelopment()){
-				//	Do our stuff!
+				set_exception_handler(array(new DevelopmentExceptionHandler(), 'run'));
+			}else{
+				set_exception_handler(array(new ProductionExceptionHandler(), 'run'));
 			}
-
-			set_exception_handler(array(new ProductionExceptionHandler(), 'run'));
 		}
 
 		private function _setErrorReporting()
