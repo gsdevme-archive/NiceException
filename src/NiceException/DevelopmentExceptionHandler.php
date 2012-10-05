@@ -7,6 +7,8 @@
 
 		public function run(\Exception $exception)
 		{
-			parent::run($exception);
+			$exceptionCollection = $this->handle($exception);
+
+			echo '<pre>' . print_r($exceptionCollection, true) . '</pre>';
 		}
 	}
