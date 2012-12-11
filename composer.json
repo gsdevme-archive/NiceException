@@ -1,5 +1,5 @@
 {
-	"name": "NiceException/NiceException",
+	"name": "niceexception/niceexception",
 	"require": {
 		"php": ">=5.3.3",
 		"another-vendor/package": "1.*"
