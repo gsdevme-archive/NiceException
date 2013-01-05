@@ -1,8 +1,8 @@
 <?php
 
-	namespace NiceException\Handlers;
+	namespace NiceException\Handlers\Responses;
 
-	abstract class Response
+	class Cli
 	{
 
 		public function __construct()
@@ -14,5 +14,7 @@
 				// Just incase for some reason is doesn't clean
 				try {ob_end_clean();} catch (\Exception $e) { }
 			}
+
 		}
+
 	}

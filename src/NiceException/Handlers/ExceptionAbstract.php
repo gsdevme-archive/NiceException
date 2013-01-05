@@ -3,37 +3,29 @@
 	namespace NiceException\Handlers;
 
 	use \NiceException\Models\NiceException;
+	use \NiceException\Collections\NiceExceptions;
 	use \SplFileObject;
+	use \SplQueue;
+	use \SplDoublyLinkedList;
 
-	abstract class Exception
+	abstract class ExceptionAbstract
 	{
 
 		protected function handle(\Exception $exception)
 		{
-			$exceptionCollection = array();
+			$exceptionCollection = new NiceExceptions();
 
-			$niceException = new NiceException();
-			$niceException->setClass(substr(get_class($exception), strrpos(get_class($exception), '\\')));
-			$niceException->setMessage($exception->getMessage());
-			$niceException->setLine($exception->getLine());
-			$niceException->setFile(new SplFileObject($exception->getFile(), 'r'));
-
-			$exceptionCollection[] = $niceException;
+			$exceptionCollection->pushNiceException($this->_constructExceptionModel($exception));
 
 			if($exception->getPrevious() !== null){
 				$previous = $exception->getPrevious();
 
-				$niceException = new NiceException();
-				$niceException->setClass(substr(get_class($previous), strrpos(get_class($previous), '\\')));
-				$niceException->setMessage($previous->getMessage());
-				$niceException->setLine($previous->getLine());
-				$niceException->setFile(new SplFileObject($previous->getFile(), 'r'));
-
-				$exceptionCollection[] = $niceException;
+				$exceptionCollection->pushNiceException($this->_constructExceptionModel($previous));
+				unset($niceException);
 			}
 
 			if ($exception->getTrace() !== null) {
-				foreach ($exception->getTrace() as $trace) {
+				foreach ((array)$exception->getTrace() as $trace) {
 					if (isset($trace['line'], $trace['file'], $trace['args'], $trace['class'], $trace['function'])) {
 						$niceException = new NiceException();
 						$niceException->setClass(substr($trace['class'], strrpos($trace['class'], '\\')));
@@ -41,7 +33,8 @@
 						$niceException->setLine($trace['line']);
 						$niceException->setFile(new SplFileObject($trace['file'], 'r'));
 
-						$exceptionCollection[] = $niceException;
+						$exceptionCollection->pushNiceException($niceException);
+						unset($niceException);
 					}
 				}
 			}
@@ -75,5 +68,16 @@
 				});
 
 			return '( ' . implode(', ', $args) . ' )';
+		}
+
+		private function _constructExceptionModel(\Exception $exception)
+		{
+			$niceException = new NiceException();
+			$niceException->setClass(substr(get_class($exception), strrpos(get_class($exception), '\\')));
+			$niceException->setMessage($exception->getMessage());
+			$niceException->setLine($exception->getLine());
+			$niceException->setFile(new SplFileObject($exception->getFile(), 'r'));
+
+			return $niceException;
 		}
 	}

@@ -1,8 +1,8 @@
 <?php
 
-	namespace NiceException;
+	namespace NiceException\Handlers;
 
-	class ProductionExceptionHandler extends Handlers\Exception
+	class ProductionExceptionHandler extends ExceptionAbstract
 	{
 
 		public function run(\Exception $exception)
@@ -13,7 +13,5 @@
 				header('500 Internal Server Error', true, 500);
 				exit;
 			}*/
-
-			echo '<pre>' . print_r($exception, true) . '</pre>';
 		}
 	}

@@ -2,6 +2,9 @@
 
 	namespace NiceException;
 
+	use \NiceException\Handlers\DevelopmentExceptionHandler;
+	use  \NiceException\Handlers\ProductionExceptionHandler;
+
 	class NiceException
 	{
 
@@ -16,10 +19,16 @@
 				'mode' => 'development',
 
 				/**
-				 * Should NiceException registry a shutdown function
-				 * to attempt to catch fatal errors
+				 * If you know your application will create a buffer you could
+				 * disable this to save abit of time
 				 */
-				'register_shutdown_function' => true,
+				'obStart' => true,
+
+				/**
+				 * Should NiceException register a shutdown function
+				 * to attempt to catch(fake catch) fatal errors
+				 */
+				'register_shutdown_function' => true, // @todo <----
 
 				/**
 				 * Should NiceException restore the error handler?
@@ -32,11 +41,14 @@
 				 */
 				'error_reporting' => true,
 
-				/**
-				 * Should NiceException set an exception handler
-				 */
+				// Should NiceException set a error handler
 				'set_error_handler' => true,
 			));
+
+			//	If PHP <5.4 this interface wont exist.. therefore we need to create it
+			if(!interface_exists('JsonSerializable')){
+				require_once __DIR__ . '/Polyfills/JsonSerializable.php';
+			}
 
 			$config->mode = strtoupper($config->mode);
 			$this->_config = $config;
@@ -44,12 +56,13 @@
 
 		public function isDevelopment()
 		{
-			return (bool)($this->_config->mode !== 'PRODUCTION');
+			return (bool)(strtoupper($this->_config->mode) !== 'PRODUCTION');
 		}
 
 		public function run()
 		{
-			$this->_setErrorReporting()
+			$this->_obStart()
+				->_setErrorReporting()
 				->_setErrorHandler();
 
 			if($this->isDevelopment()){
@@ -57,6 +70,15 @@
 			}else{
 				set_exception_handler(array(new ProductionExceptionHandler(), 'run'));
 			}
+		}
+
+		private function _obStart()
+		{
+			if($this->_config->obStart === true){
+				ob_start();
+			}
+
+			return $this;
 		}
 
 		private function _setErrorReporting()
