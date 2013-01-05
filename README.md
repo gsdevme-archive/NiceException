@@ -6,6 +6,23 @@ Requirements
 PHP 5.3.3+ (uses polyfills)
 PHP 5.4+
 
+Using with ZF2
+---------------------
+Since ZF2 has a try/catch around the Controller dispatch theres no method for NiceException
+to function.. however by attaching an event in the Module bootstrap you can rethrow the
+exception to restores PHP default behaviour
+
+```php
+<?php
+	// Get Event Manager
+	$events = $e->getApplication()->getEventManager();
+
+	// Restore PHPs default behaviour
+	$events->attach(MvcEvent::EVENT_DISPATCH_ERROR, function (MvcEvent $e) {
+		throw $e->getParam('exception');
+	});
+```
+
 Configuration
 ---------------------
 ```php
