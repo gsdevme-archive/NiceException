@@ -14,13 +14,19 @@ exception to restores PHP default behaviour
 
 ```php
 <?php
-	// Get Event Manager
-	$events = $e->getApplication()->getEventManager();
+class Module
+{
+	public function onBootstrap(MvcEvent $e)
+	{
 
-	// Restore PHPs default behaviour
-	$events->attach(MvcEvent::EVENT_DISPATCH_ERROR, function (MvcEvent $e) {
-		throw $e->getParam('exception');
-	});
+		// Get Event Manager
+		$events = $e->getApplication()->getEventManager();
+
+		// Restore PHPs default behaviour
+		$events->attach(MvcEvent::EVENT_DISPATCH_ERROR, function (MvcEvent $e) {
+			throw $e->getParam('exception');
+		});
+	}
 ```
 
 Configuration
