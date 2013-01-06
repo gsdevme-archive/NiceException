@@ -1,0 +1,13 @@
+<div class="bs-docs-example">
+	<p class="pull-right"><strong>Namespace</strong>: <%=data.exception.namespace%></p>
+	<p>
+		<span class="label label-important">Line <%=data.exception.line%></span>
+		<strong>Class</strong>: <a target="_blank" href="http://php.net/manual/en/class.<%=data.exception.class.toLowerCase()%>.php"><%=data.exception.class%></a>
+	</p>
+
+	<p><%=data.exception.message%></p>
+
+	<pre style="line-height:15px;"><code>
+<%=data.exception.lines%>
+	</code></pre>
+</div>

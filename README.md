@@ -3,8 +3,8 @@ NiceException!
 
 Requirements
 ---------------------
-PHP 5.3.3+ (uses polyfills)
-PHP 5.4+
+-PHP 5.3.3+ (uses polyfills)
+-PHP 5.4+
 
 Using with ZF2
 ---------------------
