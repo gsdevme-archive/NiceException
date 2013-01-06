@@ -44,4 +44,24 @@
 		{
 			parent::push($exception);
 		}
+
+		/**
+		 *
+		 *
+		 * @return Array
+		 */
+		public function jsonSerialize()
+		{
+			$json = array();
+
+			foreach($this as $exception){
+				if(PHP_VERSION_ID < 50400){
+					$json[] = json_encode($exception->jsonSerialize());
+				}else{
+					$json[] = json_encode($exception);
+				}
+			}
+
+			return $json;
+		}
 	}
