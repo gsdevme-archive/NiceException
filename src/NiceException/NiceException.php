@@ -1,9 +1,25 @@
 <?php
 
+	/**
+	* Short description for file
+	*
+	* Long description for file (if any)...
+	*
+	* LICENSE: Some license information
+	*
+	* @category   NiceException
+	* @package    NiceException
+	* @version    1
+	* @link       https://packagist.org/packages/niceexception/niceexception
+	* @since      1
+	* @author     Gavin Staniforth, @gsphpdev, Github: gsdevme
+	*/
+
 	namespace NiceException;
 
 	use \NiceException\Handlers\DevelopmentExceptionHandler;
-	use  \NiceException\Handlers\ProductionExceptionHandler;
+	use \NiceException\Handlers\ProductionExceptionHandler;
+	use \ErrorException;
 
 	class NiceException
 	{
@@ -12,6 +28,9 @@
 
 		public function __construct(array $config=null)
 		{
+			define('__NICE_EXCEPTION_TIME', microtime(true));
+			define('__NICE_EXCEPTION_MEMORY', memory_get_usage(true));
+
 			$config = (object)array_merge((array)$config, array(
 				/**
 				 * Error Mode: Development or Production
@@ -63,6 +82,7 @@
 		{
 			$this->_obStart()
 				->_setErrorReporting()
+				->_registerShutdownFunction()
 				->_setErrorHandler();
 
 			if($this->isDevelopment()){
@@ -85,6 +105,25 @@
 		{
 			if($this->_config->error_reporting === true){
 				error_reporting(-1);
+			}
+
+			return $this;
+		}
+
+		private function _registerShutdownFunction()
+		{
+			if($this->_config->register_shutdown_function === true){
+				$isDevelopment = $this->isDevelopment();
+
+				register_shutdown_function(function() use ($isDevelopment){
+					$error = error_get_last();
+
+					if(($error !== null)){
+						$exceptionHandler = new DevelopmentExceptionHandler();
+						$exceptionHandler->run(new ErrorException($error['message'], 0, $error['type'], $error['file'], $error['line']));
+						exit;
+					}
+				});
 			}
 
 			return $this;

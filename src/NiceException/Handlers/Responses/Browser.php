@@ -2,11 +2,16 @@
 
 	namespace NiceException\Handlers\Responses;
 
+	use \NiceException\Collections\NiceExceptions;
+
 	class Browser
 	{
 
 		// This is used to protect against an endless while.. if you have more then 15 buffers your mad!
 		CONST MAX_BUFFER_LIMIT = 15;
+
+		CONST APPLICATION_JS = '../../Resources/js/application.min.js';
+		CONST APPLICATION_CSS = '../../Resources/css/application.min.css';
 
 		public function __construct()
 		{
@@ -31,7 +36,21 @@
 						setup.. we have broken out of a loop to prevent further problems');
 				}
 			}
-
-			echo 'test';
 		}
+
+		public function render(NiceExceptions $exceptions)
+		{
+			$path = realpath(__DIR__) . '/';
+
+			if(file_exists($path)){
+				extract(array(
+					'application' => file_get_contents($path . self::APPLICATION_JS),
+					// Convert into a friendly Javascript JSON assignment
+					'exceptions' => '[' . PHP_EOL . implode(',' . PHP_EOL, $exceptions->jsonSerialize()) . PHP_EOL . '];'
+				));
+
+				include_once $path . 'Views/index.html';
+			}
+		}
+
 	}
