@@ -17,14 +17,17 @@
 
 			$exceptionCollection->pushNiceException($this->_constructExceptionModel($exception));
 
-			if($exception->getPrevious() !== null){
-				$previous = $exception->getPrevious();
+			$e = $exception;
 
-				$exceptionCollection->pushNiceException($this->_constructExceptionModel($previous));
-				unset($niceException);
+			while($e->getPrevious() !== null){
+				$exceptionCollection->pushNiceException($this->_constructExceptionModel($e->getPrevious()));
+
+				$e = $e->getPrevious();
 			}
 
-			if ($exception->getTrace() !== null) {
+			unset($e);
+
+			/*if ($exception->getTrace() !== null) {
 				foreach ((array)$exception->getTrace() as $trace) {
 					if (isset($trace['line'], $trace['file'], $trace['args'], $trace['class'], $trace['function'])) {
 						$niceException = new NiceException();
@@ -37,9 +40,37 @@
 						unset($niceException);
 					}
 				}
+			}*/
+
+			$stats = new \stdClass();
+			$stats->runtime = __NICE_EXCEPTION_TIME;
+
+			return (object)array(
+				'exceptionCollection' => $exceptionCollection,
+				'stats' => $stats
+			);
+		}
+
+		private function _constructExceptionModel(\Exception $exception)
+		{
+			$class = substr(get_class($exception), strrpos(get_class($exception), '\\'));
+			$namespace = str_replace($class, null, get_class($exception));
+
+			if(strlen($namespace) === 0){
+				$namespace = 'Global';
 			}
 
-			return $exceptionCollection;
+			$class = str_replace('\\', null, $class);
+
+			$niceException = new NiceException();
+			$niceException->setClass($class);
+			$niceException->setNamespace($namespace);
+			$niceException->setMessage($exception->getMessage());
+			$niceException->setLine($exception->getLine());
+			$niceException->setFile(new SplFileObject($exception->getFile(), 'r'));
+			$niceException->setLines($this->_getLines($niceException->getFile(), $niceException->getLine()));
+
+			return $niceException;
 		}
 
 		private function _buildParameters($args)
@@ -70,14 +101,26 @@
 			return '( ' . implode(', ', $args) . ' )';
 		}
 
-		private function _constructExceptionModel(\Exception $exception)
+		private function _getLines($file, $line)
 		{
-			$niceException = new NiceException();
-			$niceException->setClass(substr(get_class($exception), strrpos(get_class($exception), '\\')));
-			$niceException->setMessage($exception->getMessage());
-			$niceException->setLine($exception->getLine());
-			$niceException->setFile(new SplFileObject($exception->getFile(), 'r'));
+			$return = null;
+			$file = new SplFileObject($file);
 
-			return $niceException;
+			if ($line >= 11) {
+				$file->seek($line - 11);
+			}
+
+			while (($file->valid()) && ($file->key() <= $line + 9)) {
+				if ($file->key() == $line - 1) {
+					$return .= '<span style="background:#FF8C69;">' . ($file->key() + 1) . "\t" . htmlspecialchars(htmlentities($file->current(), ENT_QUOTES, 'UTF-8', false), ENT_QUOTES, 'UTF-8', false) . '</span>';
+				} else {
+					$return .= ($file->key() + 1) . "\t" . htmlspecialchars(htmlentities($file->current(), ENT_QUOTES, 'UTF-8', false), ENT_QUOTES, 'UTF-8', false);
+				}
+
+
+				$file->next();
+			}
+
+			return $return;
 		}
 	}

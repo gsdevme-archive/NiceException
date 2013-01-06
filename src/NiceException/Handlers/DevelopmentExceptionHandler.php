@@ -7,16 +7,14 @@
 
 		public function run(\Exception $exception)
 		{
-			$exceptionCollection = $this->handle($exception);
+			$data = $this->handle($exception);
 
 			if(substr(PHP_SAPI, 0, 3) === 'cli'){
-				return new Responses\Cli();
-			}else{
-				return new Responses\Browser();
+				$response = new Responses\Cli($data->exceptionCollection);
+				return;
 			}
 
-			/*foreach($exceptionCollection as $exception){
-				var_dump($exception);
-			}*/
+			$response = new Responses\Browser();
+			return $response->render($data->exceptionCollection);
 		}
 	}
